@@ -257,6 +257,30 @@ Check.methods.getSingleStatsForPeriod = function(period, date, callback) {
   });
 }
 
+Check.statics.getCheckAndStatsForPeriod = function(period, date, callback) {
+  if (period === "24h") {
+    // stats for last 24h is bundled inside checks
+    return this.find({}).asc('isUp').desc('lastChanged').run(callback);
+  };
+  var periodPrefs = singleStatsProvider[period];
+  var begin = TimeCalculator[periodPrefs['beginMethod']](date);
+  var end = TimeCalculator[periodPrefs['endMethod']](date);
+  var query = { timestamp: { $gte: begin, $lte: end } };
+  this.db.model(periodPrefs['model']).find(query).asc('isUp').desc('lastChanged').populate('check').run(function(err, stats) {
+    if (err) return callback(err);
+    var checks = [];
+    stats.forEach(function(stat) {
+      var check = stat.check;
+      stat = stat.toObject();
+      delete stat.check;
+      console.dir(stat);
+      check.qos = stat;
+      checks.push(check);
+    });
+    callback(null, checks);
+  });
+}
+
 Check.statics.convertTags = function(tags) {
   if (typeof(tags) === 'string') {
     if (tags) {

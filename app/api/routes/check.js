@@ -19,6 +19,12 @@ module.exports = function(app) {
     });
   });
 
+  app.get('/check/stat/:period/:timestamp', function(req, res, next) {
+    Check.getCheckAndStatsForPeriod(req.params.period, new Date(parseInt(req.params.timestamp)), function(err, checks) {
+      res.json(checks);
+    });
+  });
+
   app.get('/check/needingPoll', function(req, res) {
     Check.needingPoll().exclude('qos').run(function(err, checks) {
       res.json(checks);

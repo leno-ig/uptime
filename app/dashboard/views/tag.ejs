@@ -24,7 +24,7 @@ var page = {};
   <%- partial('_events', { url: '/api/tag/' + tag.name + '/events', route: route }) %>
   </div>
   <div class="tab-pane" id="tagchecks">
-  <%- partial('_checks', { url: '/api/check/tag/' + tag.name, route: route }) %>
+  <%- partial('_checks', { url: '/api/check/tag/' + tag.name + '/', route: route }) %>
   </div>
 </div>
 <script>

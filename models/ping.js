@@ -14,6 +14,7 @@ var Ping = new Schema({
   monitorName  : String,
   // for pings in error, more details need to be persisted
   downtime     : Number,   // time since last ping if the ping is down
+  slowtime     : Number,   // time since last ping if the ping is slow
   error        : String
 });
 Ping.index({ timestamp: -1 });
@@ -37,10 +38,13 @@ Ping.statics.createForCheck = function(status, time, check, monitorName, error, 
   ping.check = check;
   ping.tags = check.tags;
   ping.monitorName = monitorName;
-  if (!status) {
+  if (!ping.isUp) {
     ping.downtime = check.interval || 60000;
     ping.error = error;
-  };
+  }
+  if (!ping.isResponsive) {
+    ping.slowtime = check.interval || 60000;
+  }
   ping.save(function(err) {
     callback(err, ping);
     if (!err) {
